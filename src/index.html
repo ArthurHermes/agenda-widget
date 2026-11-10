@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agenda</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="main.js"></script>
+  </head>
+  <body>
+    <div id="card">
+      <header id="header" data-tauri-drag-region>
+        <div class="title" data-tauri-drag-region>
+          <div id="title-small" data-tauri-drag-region></div>
+          <div id="title-big" data-tauri-drag-region></div>
+        </div>
+        <div class="actions">
+          <button id="btn-new" title="Novo evento">＋</button>
+          <button id="btn-open" title="Abrir Google Agenda">↗</button>
+          <button id="btn-refresh" title="Atualizar">⟳</button>
+          <button id="btn-settings" title="Configurações">⚙</button>
+        </div>
+      </header>
+
+      <main id="list"></main>
+
+      <footer id="status" data-tauri-drag-region></footer>
+    </div>
+  </body>
+</html>

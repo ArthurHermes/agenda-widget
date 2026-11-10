@@ -1,0 +1,17 @@
+{
+  "name": "agenda-widget",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4"
+  },
+  "dependencies": {
+    "ical.js": "^2.2.1"
+  },
+  "private": true
+}

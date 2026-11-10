@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Configurações</title>
+    <link rel="stylesheet" href="app.css" />
+    <style>
+      .layout { flex: 1; display: flex; min-height: 0; }
+      nav { width: 170px; flex-shrink: 0; padding: 14px 8px; border-right: 1px solid var(--line); background: var(--panel); }
+      nav button { display: block; width: 100%; text-align: left; border: 0; background: transparent; margin-bottom: 2px; }
+      nav button.active { background: var(--panel-2); color: var(--text); }
+      nav button:not(.active) { color: var(--muted); }
+      .content { flex: 1; overflow-y: auto; padding: 18px 20px; }
+      section[hidden] { display: none; }
+      .account-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+      .account-head b { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+      .cal { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+      .cal input[type="color"] { height: 24px; width: 32px; }
+      .cal .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .ical { display: grid; grid-template-columns: auto auto 1fr auto; gap: 8px; align-items: center; margin-bottom: 14px; }
+      .ical .url { grid-column: 1 / -1; }
+      .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+      .range-val { color: var(--text); float: right; }
+    </style>
+    <script type="module" src="settings.js"></script>
+  </head>
+  <body>
+    <div class="layout">
+      <nav>
+        <button data-tab="accounts" class="active">Contas Google</button>
+        <button data-tab="icals">Links iCal</button>
+        <button data-tab="appearance">Aparência</button>
+        <button data-tab="window">Posição e janela</button>
+        <button data-tab="general">Geral</button>
+      </nav>
+
+      <div class="content">
+        <!-- ===== Contas ===== -->
+        <section id="tab-accounts">
+          <div class="card">
+            <h2>App do Google (configurar uma vez)</h2>
+            <p class="muted small">
+              Para ler e editar sua agenda, o widget precisa de um “app” OAuth seu no Google Cloud. É gratuito.
+            </p>
+            <details>
+              <summary>Como criar o Client ID e o Client Secret</summary>
+              <ol>
+                <li>Abra o <a data-href="https://console.cloud.google.com/projectcreate">Google Cloud Console</a> e crie um projeto (ex.: “Agenda Widget”).</li>
+                <li>Ative a <a data-href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com">Google Calendar API</a> nesse projeto.</li>
+                <li>Em <a data-href="https://console.cloud.google.com/auth/overview">Google Auth Platform</a>, clique em <b>Começar</b>: dê um nome, escolha <b>Externo</b> e informe seu e-mail.</li>
+                <li>Em <b>Público-alvo</b>, clique em <b>Publicar app</b> (para colocá-lo “Em produção”). Se ficar em “Teste”, adicione cada e-mail que for conectar como usuário de teste, mas o login expira a cada 7 dias.</li>
+                <li>Em <a data-href="https://console.cloud.google.com/auth/clients">Clientes</a>, clique em <b>Criar cliente</b>, escolha o tipo <b>App para computador</b> e copie o <b>ID do cliente</b> e a <b>Chave secreta</b> para os campos abaixo.</li>
+                <li>No login, o Google avisa que o app não foi verificado. Como o app é seu, clique em <b>Avançado → Acessar</b>.</li>
+              </ol>
+            </details>
+            <label class="field"><span>Client ID</span><input data-key="google.client_id" placeholder="123…apps.googleusercontent.com" spellcheck="false" /></label>
+            <label class="field"><span>Client Secret</span><input data-key="google.client_secret" type="password" placeholder="GOCSPX-…" spellcheck="false" /></label>
+            <button id="btn-connect" class="primary">＋ Conectar conta Google</button>
+            <div id="connect-status" class="status"></div>
+          </div>
+
+          <div id="accounts"></div>
+        </section>
+
+        <!-- ===== iCal ===== -->
+        <section id="tab-icals" hidden>
+          <h2>Links iCal (somente leitura)</h2>
+          <p class="muted small">
+            Útil para agendas que você não consegue conectar como conta, como feriados ou agendas de terceiros.
+            Na Google Agenda: Configurações → agenda → Integrar agenda → <b>Endereço secreto no formato iCal</b>.
+          </p>
+          <div id="icals"></div>
+          <button id="btn-add-ical">＋ Adicionar link</button>
+        </section>
+
+        <!-- ===== Aparência ===== -->
+        <section id="tab-appearance" hidden>
+          <h3>Temas prontos</h3>
+          <div class="presets">
+            <button data-preset="dark">Escuro</button>
+            <button data-preset="glass">Vidro</button>
+            <button data-preset="light">Claro</button>
+            <button data-preset="contrast">Alto contraste</button>
+            <button data-preset="minimal">Minimalista</button>
+          </div>
+
+          <h3>Cores</h3>
+          <div class="colors">
+            <label>Fundo <input type="color" data-key="appearance.bg" /></label>
+            <label>Texto <input type="color" data-key="appearance.text" /></label>
+            <label>Secundário <input type="color" data-key="appearance.muted" /></label>
+            <label>Destaque <input type="color" data-key="appearance.accent" /></label>
+          </div>
+          <label class="field"><span>Opacidade do fundo <b class="range-val" data-val="appearance.opacity"></b></span>
+            <input type="range" min="0" max="1" step="0.01" data-key="appearance.opacity" /></label>
+
+          <h3>Texto e forma</h3>
+          <label class="field"><span>Fonte</span>
+            <select data-key="appearance.font">
+              <option value='"Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif'>Segoe UI</option>
+              <option value='"Segoe UI Variable Display", "Segoe UI", sans-serif'>Segoe UI Display</option>
+              <option value='Inter, "Segoe UI", sans-serif'>Inter (se instalada)</option>
+              <option value='Bahnschrift, "Segoe UI", sans-serif'>Bahnschrift</option>
+              <option value='Calibri, sans-serif'>Calibri</option>
+              <option value='"Cascadia Code", Consolas, monospace'>Cascadia Code</option>
+              <option value='Consolas, monospace'>Consolas</option>
+              <option value='Georgia, serif'>Georgia</option>
+            </select>
+          </label>
+          <div class="grid2">
+            <label class="field"><span>Tamanho do texto <b class="range-val" data-val="appearance.font_size"></b></span>
+              <input type="range" min="10" max="24" step="0.5" data-key="appearance.font_size" /></label>
+            <label class="field"><span>Cantos arredondados <b class="range-val" data-val="appearance.radius"></b></span>
+              <input type="range" min="0" max="32" step="1" data-key="appearance.radius" /></label>
+          </div>
+          <label class="check"><input type="checkbox" data-key="appearance.border" /> Borda sutil</label>
+
+          <h3>Conteúdo</h3>
+          <div class="grid2">
+            <label class="field"><span>Layout</span>
+              <select data-key="appearance.layout">
+                <option value="list">Lista (horário embaixo do título)</option>
+                <option value="compact">Compacto (horário à esquerda)</option>
+              </select>
+            </label>
+            <label class="field"><span>Botões do topo</span>
+              <select data-key="appearance.show_buttons">
+                <option value="hover">Mostrar ao passar o mouse</option>
+                <option value="always">Sempre visíveis</option>
+                <option value="never">Esconder</option>
+              </select>
+            </label>
+          </div>
+          <label class="field"><span>Texto do topo (vazio = dia da semana)</span>
+            <input data-key="appearance.title" placeholder="ex.: Minha agenda" /></label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_header" /> Mostrar cabeçalho com a data</label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_footer" /> Mostrar rodapé (hora da atualização)</label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_location" /> Mostrar local</label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_calendar_name" /> Mostrar nome da agenda</label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_past" /> Mostrar eventos que já passaram hoje</label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_empty_days" /> Mostrar dias sem eventos</label>
+        </section>
+
+        <!-- ===== Janela ===== -->
+        <section id="tab-window" hidden>
+          <h3>Posição e tamanho</h3>
+          <p class="muted small">Você também pode arrastar o widget pelo cabeçalho e redimensionar pelas bordas. Os campos acompanham.</p>
+          <div class="grid4">
+            <label class="field"><span>X</span><input type="number" id="geo-x" /></label>
+            <label class="field"><span>Y</span><input type="number" id="geo-y" /></label>
+            <label class="field"><span>Largura</span><input type="number" id="geo-w" min="200" /></label>
+            <label class="field"><span>Altura</span><input type="number" id="geo-h" min="120" /></label>
+          </div>
+          <div class="presets">
+            <button data-corner="top-left">↖ Superior esquerdo</button>
+            <button data-corner="top-right">↗ Superior direito</button>
+            <button data-corner="bottom-left">↙ Inferior esquerdo</button>
+            <button data-corner="bottom-right">↘ Inferior direito</button>
+          </div>
+          <div class="presets">
+            <button data-size="300x420">Pequeno</button>
+            <button data-size="340x520">Médio</button>
+            <button data-size="400x680">Grande</button>
+            <button data-size="300x900">Coluna alta</button>
+          </div>
+
+          <h3>Comportamento</h3>
+          <label class="field"><span>Camada</span>
+            <select data-key="appearance.layer">
+              <option value="desktop">Na área de trabalho (atrás de tudo, sobrevive ao Win+D)</option>
+              <option value="normal">Janela normal</option>
+              <option value="top">Sempre no topo</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" data-key="appearance.locked" /> Travar posição e tamanho</label>
+
+          <h3>Não atrapalhar o que está atrás</h3>
+          <label class="check"><input type="checkbox" data-key="appearance.click_through" /> Deixar os cliques atravessarem o widget</label>
+          <p class="muted small">
+            Os cliques vão direto para os ícones e janelas atrás do widget. Para usar o widget
+            (clicar num evento, arrastar, botões), <b>segure Ctrl</b> com o mouse em cima dele: aparece uma
+            borda colorida. Também dá para ligar e desligar pelo ícone na bandeja.
+          </p>
+          <label class="check"><input type="checkbox" data-key="appearance.fade_on_hover" /> Ficar quase invisível quando o mouse passa por cima</label>
+          <label class="field"><span>Visibilidade ao passar o mouse <b class="range-val" data-val="appearance.fade_opacity"></b></span>
+            <input type="range" min="0" max="0.6" step="0.02" data-key="appearance.fade_opacity" /></label>
+          <p class="muted small">Um clique no ícone da bandeja esconde ou mostra o widget.</p>
+          <p class="muted small">Para iniciar junto com o Windows, use o ícone do widget na bandeja do sistema.</p>
+        </section>
+
+        <!-- ===== Geral ===== -->
+        <section id="tab-general" hidden>
+          <div class="grid2">
+            <label class="field"><span>Quantos dias mostrar</span><input type="number" min="1" max="60" data-key="days_ahead" /></label>
+            <label class="field"><span>Atualizar a cada (minutos)</span><input type="number" min="1" max="240" data-key="refresh_minutes" /></label>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <span id="save-status" class="muted small"></span>
+      <span class="spacer"></span>
+      <button id="btn-cancel">Cancelar</button>
+      <button id="btn-save" class="primary">Salvar</button>
+    </div>
+  </body>
+</html>
