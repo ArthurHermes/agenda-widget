@@ -5,7 +5,7 @@ eventos e aparência totalmente customizável. Feito com Tauri 2 (Rust + WebView
 
 ## Instalar
 
-1. Baixe o `Agenda.Widget_x.y.z_x64-setup.exe` em [**Releases**](https://github.com/ArthurHermes/agenda-widget/releases/latest).
+1. Baixe o `Agenda-Widget_x.y.z_x64-setup.exe` em [**Releases**](https://github.com/ArthurHermes/agenda-widget/releases/latest).
 2. Execute. Como o instalador não é assinado digitalmente, o Windows pode mostrar
    "O Windows protegeu o computador": clique em **Mais informações → Executar assim mesmo**.
 3. O widget aparece no canto superior direito e um ícone fica na bandeja do sistema (perto do relógio).
