@@ -195,3 +195,22 @@ body.no-header header { display: none; }
 }
 body:not(.locked) #card:hover #grip { opacity: 0.8; }
 body.locked #grip { display: none; }
+
+/* Reuniões: botão "Entrar" e lápis de editar. */
+.ev-actions { display: flex; align-items: center; gap: 0.25em; flex-shrink: 0; align-self: center; }
+.ev-actions button {
+  font: inherit;
+  font-size: 0.8em;
+  line-height: 1.4;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.1em 0.6em;
+  cursor: pointer;
+}
+.ev-actions button:hover { background: var(--hover); }
+.ev-actions .join.hot { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+.ev-actions .join.hot:hover { filter: brightness(1.1); }
+.ev-actions .edit { border-color: transparent; color: var(--muted); padding: 0.1em 0.4em; opacity: 0; }
+.event:hover .ev-actions .edit { opacity: 1; }

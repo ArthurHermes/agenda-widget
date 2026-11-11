@@ -1,6 +1,7 @@
 // Lê um arquivo .ics e devolve as ocorrências dentro de [rangeStart, rangeEnd),
 // expandindo eventos recorrentes (RRULE/EXDATE) e aplicando exceções (RECURRENCE-ID).
 import ICAL from './vendor/ical.js';
+import { findMeetingUrl } from './lib/meeting.js';
 
 const MAX_ITERATIONS = 20000;
 
@@ -17,10 +18,16 @@ function toOccurrence(event, startTime, endTime, component, meta) {
   let end = endTime ? endTime.toJSDate() : start;
   const allDay = startTime.isDate;
   if (allDay && end <= start) end = new Date(start.getTime() + 86400000);
+  const location = component.getFirstPropertyValue('location') || '';
   return {
     uid: event.uid,
     title: component.getFirstPropertyValue('summary') || '(sem título)',
-    location: component.getFirstPropertyValue('location') || '',
+    location,
+    meetingUrl: findMeetingUrl({
+      url: component.getFirstPropertyValue('url') || '',
+      location,
+      description: component.getFirstPropertyValue('description') || '',
+    }),
     start,
     end,
     allDay,

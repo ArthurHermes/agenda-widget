@@ -8,7 +8,8 @@ eventos e aparência totalmente customizável. Feito com Tauri 2 (Rust + WebView
 1. Baixe o `Agenda-Widget_x.y.z_x64-setup.exe` em [**Releases**](https://github.com/ArthurHermes/agenda-widget/releases/latest).
 2. Execute. Como o instalador não é assinado digitalmente, o Windows pode mostrar
    "O Windows protegeu o computador": clique em **Mais informações → Executar assim mesmo**.
-3. O widget aparece no canto superior direito e um ícone fica na bandeja do sistema (perto do relógio).
+3. No fim, o instalador pergunta se o widget deve **iniciar junto com o Windows**.
+4. O widget aparece no canto superior direito e um ícone fica na bandeja do sistema (perto do relógio).
 
 Requer Windows 10/11 (o WebView2 já vem no Windows 11; no 10 o instalador baixa se faltar).
 
@@ -36,6 +37,9 @@ A config fica em `%APPDATA%\dev.local.agenda-widget\config.json`.
 - **Links iCal:** agendas extras somente leitura (feriados, agendas de terceiros).
 - **Eventos:** clique para editar, ＋ no topo ou ao lado de cada dia para criar. Dá para trocar a
   agenda, inclusive para outra conta. Em eventos recorrentes, a edição vale só para a ocorrência clicada.
+- **Reuniões:** eventos com link do Google Meet, Zoom, Teams, Webex etc. (ou um link no campo
+  "local") abrem a reunião com um clique e mostram um botão **Entrar**, que fica destacado 15 min
+  antes. Para editar, use o ✎. Dá para inverter (clique edita) em ⚙ → Aparência → Reuniões.
 - **Aparência (prévia ao vivo):** temas prontos, cores de fundo/texto/destaque, opacidade, fonte,
   tamanho do texto, cantos, borda, layout lista ou compacto, e o que mostrar (cabeçalho, rodapé,
   local, nome da agenda, eventos passados, dias vazios, botões).

@@ -1,6 +1,7 @@
 // Editor de evento: cria, altera, move de agenda e exclui.
 import { loadConfig, writableCalendars } from './lib/config.js';
 import { getEvent, createEvent, patchEvent, deleteEvent, moveEvent, parseDateOnly } from './lib/google.js';
+import { findMeetingUrl } from './lib/meeting.js';
 
 const { emit } = window.__TAURI__.event;
 const { openUrl } = window.__TAURI__.opener;
@@ -193,6 +194,12 @@ async function init() {
       if (idx >= 0) select.value = String(idx);
       $('#recurring-note').hidden = !ev.recurringEventId;
       $('#btn-delete').hidden = false;
+      const meetingUrl = findMeetingUrl(ev);
+      if (meetingUrl) {
+        $('#btn-join').hidden = false;
+        $('#btn-join').title = meetingUrl;
+        $('#btn-join').addEventListener('click', () => openUrl(meetingUrl));
+      }
       if (ev.htmlLink) {
         $('#btn-google').hidden = false;
         $('#btn-google').addEventListener('click', () => openUrl(ev.htmlLink));

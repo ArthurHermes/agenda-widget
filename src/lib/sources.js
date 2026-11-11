@@ -1,6 +1,7 @@
 // Junta os eventos de todas as fontes (contas Google + links iCal).
 import { parseCalendar } from '../events.js';
 import { listEvents, parseDateOnly } from './google.js';
+import { findMeetingUrl } from './meeting.js';
 
 const { invoke } = window.__TAURI__.core;
 
@@ -18,6 +19,7 @@ function fromGoogle(item, account, cal) {
     htmlLink: item.htmlLink,
     title: item.summary || '(sem título)',
     location: item.location || '',
+    meetingUrl: findMeetingUrl(item),
     start,
     end,
     allDay,

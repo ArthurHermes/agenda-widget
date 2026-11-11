@@ -37,6 +37,8 @@ export const DEFAULTS = {
     show_past: true,
     show_empty_days: false,
     show_buttons: 'hover', // hover | always | never
+    meeting_click: 'join', // join (clique abre a reunião) | edit (clique edita)
+    show_join_button: true,
   },
 };
 

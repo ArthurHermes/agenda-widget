@@ -139,6 +139,16 @@
           <label class="check"><input type="checkbox" data-key="appearance.show_calendar_name" /> Mostrar nome da agenda</label>
           <label class="check"><input type="checkbox" data-key="appearance.show_past" /> Mostrar eventos que já passaram hoje</label>
           <label class="check"><input type="checkbox" data-key="appearance.show_empty_days" /> Mostrar dias sem eventos</label>
+
+          <h3>Reuniões</h3>
+          <p class="muted small">Eventos com link do Google Meet, Zoom, Teams, Webex e outros (ou um link no campo “local”).</p>
+          <label class="field"><span>Ao clicar num evento de reunião</span>
+            <select data-key="appearance.meeting_click">
+              <option value="join">Abrir o link da reunião (o ✎ edita)</option>
+              <option value="edit">Editar o evento (use o botão “Entrar”)</option>
+            </select>
+          </label>
+          <label class="check"><input type="checkbox" data-key="appearance.show_join_button" /> Mostrar botão “Entrar” (fica destacado 15 min antes)</label>
         </section>
 
         <!-- ===== Janela ===== -->

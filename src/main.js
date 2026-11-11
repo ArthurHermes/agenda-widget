@@ -185,7 +185,32 @@ function eventEl(ev, day, now) {
 
   row.title = [ev.title, when, ev.location, ev.calendar].filter(Boolean).join('\n');
   row.append(bar, time, body);
-  row.addEventListener('click', () => onEventClick(ev, day));
+
+  // Reunião: botão "Entrar" (destacado se está rolando ou começa em até 15 min).
+  const actions = el('div', 'ev-actions');
+  const ended = !ev.allDay && ev.end <= now;
+  const clickJoins = !!ev.meetingUrl && a.meeting_click === 'join';
+  if (ev.meetingUrl && a.show_join_button && !ended) {
+    const startsIn = (ev.start - now) / 60000;
+    const join = el('button', 'join', 'Entrar');
+    if (!ev.allDay && startsIn <= 15) join.classList.add('hot');
+    join.title = `Entrar na reunião
+${ev.meetingUrl}`;
+    join.addEventListener('click', (e) => { e.stopPropagation(); openUrl(ev.meetingUrl); });
+    actions.append(join);
+  }
+  // Se o clique abre a reunião, o lápis edita (ou abre no Google).
+  if (clickJoins) {
+    const edit = el('button', 'edit', '✎');
+    edit.title = ev.editable ? 'Editar evento' : 'Abrir no Google Agenda';
+    edit.addEventListener('click', (e) => { e.stopPropagation(); onEventClick(ev, day); });
+    actions.append(edit);
+  }
+  if (actions.childElementCount) row.append(actions);
+
+  if (ev.meetingUrl) row.title += `
+Reunião: ${ev.meetingUrl}`;
+  row.addEventListener('click', () => (clickJoins ? openUrl(ev.meetingUrl) : onEventClick(ev, day)));
   return row;
 }
 

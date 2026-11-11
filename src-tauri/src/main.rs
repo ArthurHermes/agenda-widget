@@ -11,7 +11,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Emitter, Manager, WindowEvent,
 };
-use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
 
 // ---------- Configuração (JSON livre; os padrões ficam no frontend) ----------
@@ -174,7 +174,12 @@ fn main() {
                 .with_filter(|label| label == window::MAIN)
                 .build(),
         )
-        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
+        // Nome fixo = mesmo valor de registro que o instalador grava (installer-hooks.nsh).
+        .plugin(
+            tauri_plugin_autostart::Builder::new()
+                .app_name("Agenda Widget")
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .manage(google::Tokens::default())
         .manage(clickthrough::ClickThrough::default())
