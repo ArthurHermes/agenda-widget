@@ -88,18 +88,21 @@ fn toggle_widget(app: &AppHandle) {
 
 fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let autostart_on = app.autolaunch().is_enabled().unwrap_or(false);
-    let click_through_on = app.state::<clickthrough::ClickThrough>().is_enabled();
+    let cfg = read_config(app);
+    let click_through_on = cfg["appearance"]["click_through"].as_bool().unwrap_or(false);
+    let locked_on = cfg["appearance"]["locked"].as_bool().unwrap_or(false);
 
     let toggle = MenuItem::with_id(app, "toggle", "Mostrar/esconder widget", true, None::<&str>)?;
+    let locked = CheckMenuItem::with_id(app, "locked", "Travar widget", true, locked_on, None::<&str>)?;
     let click_through = CheckMenuItem::with_id(
         app,
         "click-through",
-        "Atravessar cliques (Ctrl para usar)",
+        "Atravessar cliques quando travado (Ctrl para usar)",
         true,
         click_through_on,
         None::<&str>,
     )?;
-    app.manage(clickthrough::TrayToggle(click_through.clone()));
+    app.manage(clickthrough::TrayItems { locked: locked.clone(), click_through: click_through.clone() });
 
     let refresh = MenuItem::with_id(app, "refresh", "Atualizar agora", true, None::<&str>)?;
     let settings = MenuItem::with_id(app, "settings", "Configurações…", true, None::<&str>)?;
@@ -110,7 +113,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     let sep = PredefinedMenuItem::separator(app)?;
     let menu = Menu::with_items(
         app,
-        &[&toggle, &click_through, &sep, &refresh, &settings, &reset, &sep, &autostart, &sep, &quit],
+        &[&toggle, &locked, &click_through, &sep, &refresh, &settings, &reset, &sep, &autostart, &sep, &quit],
     )?;
 
     let autostart_item = autostart.clone();
@@ -127,10 +130,8 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
         })
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "toggle" => toggle_widget(app),
-            "click-through" => {
-                let on = !app.state::<clickthrough::ClickThrough>().is_enabled();
-                clickthrough::set(app, on, true);
-            }
+            "locked" => clickthrough::toggle_flag(app, "locked"),
+            "click-through" => clickthrough::toggle_flag(app, "click_through"),
             "refresh" => {
                 let _ = app.emit("events-changed", ());
             }
@@ -189,8 +190,7 @@ fn main() {
             window::set_widget_geometry,
             window::move_widget_to,
             window::open_window,
-            clickthrough::set_click_through,
-            clickthrough::get_click_through,
+            clickthrough::apply_interaction,
         ])
         .on_window_event(|win, event| {
             if win.label() != window::MAIN {
@@ -204,8 +204,6 @@ fn main() {
         })
         .setup(|app| {
             let cfg = read_config(app.handle());
-            let click_through = cfg["appearance"]["click_through"].as_bool().unwrap_or(false);
-            clickthrough::set(app.handle(), click_through, false);
             build_tray(app.handle())?;
             if let Some(win) = app.get_webview_window(window::MAIN) {
                 // Primeira execução (sem posição salva): canto superior direito.
@@ -220,6 +218,8 @@ fn main() {
                 let layer = cfg["appearance"]["layer"].as_str().unwrap_or("desktop");
                 let locked = cfg["appearance"]["locked"].as_bool().unwrap_or(false);
                 window::apply_options(&win, layer, locked);
+                let click_through = cfg["appearance"]["click_through"].as_bool().unwrap_or(false);
+                clickthrough::apply(app.handle(), click_through, locked);
                 win.show()?;
             }
             clickthrough::start(app.handle().clone());

@@ -144,7 +144,7 @@
         <!-- ===== Janela ===== -->
         <section id="tab-window" hidden>
           <h3>Posição e tamanho</h3>
-          <p class="muted small">Você também pode arrastar o widget pelo cabeçalho e redimensionar pelas bordas. Os campos acompanham.</p>
+          <p class="muted small">Com o widget destravado, você também pode arrastá-lo por qualquer área vazia e redimensioná-lo pela alça no canto inferior direito. Os campos acompanham.</p>
           <div class="grid4">
             <label class="field"><span>X</span><input type="number" id="geo-x" /></label>
             <label class="field"><span>Y</span><input type="number" id="geo-y" /></label>
@@ -172,14 +172,15 @@
               <option value="top">Sempre no topo</option>
             </select>
           </label>
-          <label class="check"><input type="checkbox" data-key="appearance.locked" /> Travar posição e tamanho</label>
+          <label class="check"><input type="checkbox" data-key="appearance.locked" /> 🔒 Travar widget (não move nem muda de tamanho)</label>
+          <p class="muted small">Destravado, o widget fica em modo edição: aparece uma borda ao passar o mouse. Também dá para travar e destravar pelo ícone na bandeja.</p>
 
           <h3>Não atrapalhar o que está atrás</h3>
-          <label class="check"><input type="checkbox" data-key="appearance.click_through" /> Deixar os cliques atravessarem o widget</label>
+          <label class="check"><input type="checkbox" data-key="appearance.click_through" /> Quando travado, deixar os cliques atravessarem o widget</label>
           <p class="muted small">
-            Os cliques vão direto para os ícones e janelas atrás do widget. Para usar o widget
-            (clicar num evento, arrastar, botões), <b>segure Ctrl</b> com o mouse em cima dele: aparece uma
-            borda colorida. Também dá para ligar e desligar pelo ícone na bandeja.
+            Com o widget <b>travado</b>, os cliques vão direto para os ícones e janelas atrás dele. Para clicar
+            num evento ou nos botões, <b>segure Ctrl</b> com o mouse em cima do widget: aparece uma borda colorida.
+            Destravado, o widget sempre recebe os cliques normalmente.
           </p>
           <label class="check"><input type="checkbox" data-key="appearance.fade_on_hover" /> Ficar quase invisível quando o mouse passa por cima</label>
           <label class="field"><span>Visibilidade ao passar o mouse <b class="range-val" data-val="appearance.fade_opacity"></b></span>

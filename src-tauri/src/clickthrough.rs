@@ -1,6 +1,9 @@
-//! Modo "atravessar cliques": o widget deixa os cliques passarem para o que
-//! está atrás (ícones da área de trabalho, outras janelas). Segurando Ctrl com
-//! o mouse em cima dele, o widget volta a responder normalmente.
+//! Travar e "atravessar cliques".
+//!
+//! - Destravado (modo edição): o widget é totalmente clicável, arrasta e redimensiona.
+//! - Travado: não move nem redimensiona. Se "atravessar cliques" estiver ligado,
+//!   os cliques passam para o que está atrás; segurando Ctrl com o mouse em cima,
+//!   o widget volta a responder (para clicar num evento, por exemplo).
 
 use serde_json::{json, Value};
 use std::{
@@ -11,53 +14,64 @@ use std::{
     thread,
     time::Duration,
 };
-use tauri::{menu::CheckMenuItem, AppHandle, Emitter, Manager, State, Wry};
+use tauri::{menu::CheckMenuItem, AppHandle, Emitter, Manager, Wry};
 
 use crate::{read_config, window::MAIN, write_config};
 
+/// Estado efetivo: atravessa cliques = click_through && locked.
 #[derive(Clone, Default)]
 pub struct ClickThrough {
-    enabled: Arc<AtomicBool>,
+    active: Arc<AtomicBool>,
 }
-
-/// Item "Atravessar cliques" do menu da bandeja, para manter o ✓ sincronizado.
-pub struct TrayToggle(pub CheckMenuItem<Wry>);
 
 impl ClickThrough {
-    pub fn is_enabled(&self) -> bool {
-        self.enabled.load(Ordering::Relaxed)
+    fn is_active(&self) -> bool {
+        self.active.load(Ordering::Relaxed)
     }
 }
 
-/// Liga/desliga o modo, atualiza o ✓ da bandeja e (opcionalmente) grava na config.
-pub fn set(app: &AppHandle, enabled: bool, persist: bool) {
-    app.state::<ClickThrough>().enabled.store(enabled, Ordering::Relaxed);
-    if let Some(item) = app.try_state::<TrayToggle>() {
-        let _ = item.0.set_checked(enabled);
+/// Itens da bandeja, para manter os ✓ sincronizados com a config.
+pub struct TrayItems {
+    pub locked: CheckMenuItem<Wry>,
+    pub click_through: CheckMenuItem<Wry>,
+}
+
+/// Aplica travar + atravessar cliques (chamado na inicialização e pelo widget).
+pub fn apply(app: &AppHandle, click_through: bool, locked: bool) {
+    app.state::<ClickThrough>()
+        .active
+        .store(click_through && locked, Ordering::Relaxed);
+    if let Some(items) = app.try_state::<TrayItems>() {
+        let _ = items.locked.set_checked(locked);
+        let _ = items.click_through.set_checked(click_through);
     }
-    if persist {
-        let mut cfg = read_config(app);
-        if !cfg.is_object() {
-            cfg = json!({});
-        }
-        if !cfg["appearance"].is_object() {
-            cfg["appearance"] = json!({});
-        }
-        cfg["appearance"]["click_through"] = Value::Bool(enabled);
-        if write_config(app, &cfg).is_ok() {
-            let _ = app.emit("config-changed", cfg);
-        }
+    if let Some(win) = app.get_webview_window(MAIN) {
+        let _ = win.set_resizable(!locked);
     }
 }
 
 #[tauri::command]
-pub fn set_click_through(app: AppHandle, enabled: bool) {
-    set(&app, enabled, false);
+pub fn apply_interaction(app: AppHandle, click_through: bool, locked: bool) {
+    apply(&app, click_through, locked);
 }
 
-#[tauri::command]
-pub fn get_click_through(state: State<'_, ClickThrough>) -> bool {
-    state.is_enabled()
+/// Inverte appearance.<key> na config, grava e avisa as janelas.
+pub fn toggle_flag(app: &AppHandle, key: &str) {
+    let mut cfg = read_config(app);
+    if !cfg.is_object() {
+        cfg = json!({});
+    }
+    if !cfg["appearance"].is_object() {
+        cfg["appearance"] = json!({});
+    }
+    let current = cfg["appearance"][key].as_bool().unwrap_or(false);
+    cfg["appearance"][key] = Value::Bool(!current);
+    let ct = cfg["appearance"]["click_through"].as_bool().unwrap_or(false);
+    let locked = cfg["appearance"]["locked"].as_bool().unwrap_or(false);
+    apply(app, ct, locked);
+    if write_config(app, &cfg).is_ok() {
+        let _ = app.emit("config-changed", cfg);
+    }
 }
 
 #[cfg(windows)]
@@ -99,24 +113,24 @@ pub fn start(app: AppHandle) {
     let state = app.state::<ClickThrough>().inner().clone();
 
     thread::spawn(move || {
-        // (ignorando cliques?, mouse em cima?, interativo?)
+        // (ignorando cliques?, mouse em cima?, ativo?)
         let mut last: Option<(bool, bool, bool)> = None;
         loop {
             thread::sleep(Duration::from_millis(40));
-            let enabled = state.is_enabled();
-            let (over, ctrl) = if enabled { cursor_and_ctrl(hwnd) } else { (false, false) };
-            let interactive = !enabled || (over && ctrl);
-            let now = (!interactive, over, interactive);
+            let active = state.is_active();
+            let (over, ctrl) = if active { cursor_and_ctrl(hwnd) } else { (false, false) };
+            let ignoring = active && !(over && ctrl);
+            let now = (ignoring, over, active);
             if last == Some(now) {
                 continue;
             }
-            if last.map(|l| l.0) != Some(now.0) {
-                let _ = win.set_ignore_cursor_events(now.0);
+            if last.map(|l| l.0) != Some(ignoring) {
+                let _ = win.set_ignore_cursor_events(ignoring);
             }
             let _ = app.emit_to(
                 MAIN,
                 "pointer-state",
-                json!({ "enabled": enabled, "over": over, "interactive": interactive }),
+                json!({ "enabled": active, "over": over, "interactive": !ignoring }),
             );
             last = Some(now);
         }

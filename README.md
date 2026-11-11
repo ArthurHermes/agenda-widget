@@ -41,10 +41,10 @@ A config fica em `%APPDATA%\dev.local.agenda-widget\config.json`.
   local, nome da agenda, eventos passados, dias vazios, botões).
 - **Janela:** posição e tamanho numéricos (ou arrastando), cantos e tamanhos pré-definidos,
   camada (área de trabalho / normal / sempre no topo) e travar posição.
-- **Atravessar cliques:** os cliques passam para os ícones e janelas atrás do widget; segure **Ctrl**
+- **Travar e atravessar cliques:** destravado, o widget arrasta por qualquer área vazia e redimensiona pela alça no canto. Travado, se "atravessar cliques" estiver ligado, os cliques passam para os ícones e janelas atrás; segure **Ctrl**
   com o mouse em cima para usá-lo (aparece uma borda colorida). Opcionalmente, ele fica quase
   invisível quando o mouse passa por cima. Liga e desliga em ⚙ → Posição e janela ou pela bandeja.
-- **Bandeja:** clique no ícone para mostrar/esconder o widget. Menu: atravessar cliques, atualizar, configurações, trazer para o canto, iniciar com o Windows, sair.
+- **Bandeja:** clique no ícone para mostrar/esconder o widget. Menu: travar widget, atravessar cliques, atualizar, configurações, trazer para o canto, iniciar com o Windows, sair.
 
 ## Desenvolvimento
 

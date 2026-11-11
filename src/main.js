@@ -5,6 +5,7 @@ import { fetchAll } from './lib/sources.js';
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 const { openUrl } = window.__TAURI__.opener;
+const appWindow = window.__TAURI__.window.getCurrentWindow();
 
 const DAY = 86400000;
 const $ = (sel) => document.querySelector(sel);
@@ -56,13 +57,27 @@ function applyAppearance(a) {
   root.setProperty('--ghost', a.fade_opacity);
   b.toggle('click-through', a.click_through);
   b.toggle('fade-on-hover', a.fade_on_hover);
-  invoke('set_click_through', { enabled: !!a.click_through });
+  invoke('apply_interaction', { clickThrough: !!a.click_through, locked: !!a.locked });
+}
 
-  // Travado: remove as áreas de arrastar.
-  for (const el of document.querySelectorAll('[data-drag]')) {
-    if (a.locked) el.removeAttribute('data-tauri-drag-region');
-    else el.setAttribute('data-tauri-drag-region', '');
-  }
+// ---------- Mover e redimensionar (só destravado) ----------
+
+function setupDragAndResize() {
+  const list = $('#list');
+  document.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || config?.appearance.locked) return;
+    // Botões, eventos e a alça têm comportamento próprio.
+    if (e.target.closest('button, input, a, .event, #grip')) return;
+    // Clique na barra de rolagem da lista: deixa rolar.
+    if (e.target === list && e.offsetX >= list.clientWidth) return;
+    e.preventDefault();
+    appWindow.startDragging();
+  });
+  $('#grip').addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || config?.appearance.locked) return;
+    e.preventDefault();
+    appWindow.startResizeDragging('SouthEast');
+  });
 }
 
 // ---------- Dados ----------
@@ -239,7 +254,7 @@ function useConfig(cfg) {
 }
 
 async function init() {
-  for (const el of document.querySelectorAll('[data-tauri-drag-region]')) el.setAttribute('data-drag', '');
+  setupDragAndResize();
   useConfig(await loadConfig());
 
   $('#btn-refresh').addEventListener('click', refresh);

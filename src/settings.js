@@ -322,14 +322,18 @@ async function init() {
     });
   }
   await listen('widget-geometry', (e) => fillGeometry(e.payload));
-  // "Atravessar cliques" alternado pela bandeja enquanto esta janela está aberta.
+  // Travar / atravessar cliques alternados pela bandeja enquanto esta janela está aberta.
   await listen('config-changed', (e) => {
-    const v = e.payload?.appearance?.click_through;
-    if (typeof v === 'boolean' && v !== draft.appearance.click_through) {
-      draft.appearance.click_through = v;
-      original.appearance.click_through = v;
-      fillBound();
+    let changedAny = false;
+    for (const key of ['click_through', 'locked']) {
+      const v = e.payload?.appearance?.[key];
+      if (typeof v === 'boolean' && v !== draft.appearance[key]) {
+        draft.appearance[key] = v;
+        original.appearance[key] = v;
+        changedAny = true;
+      }
     }
+    if (changedAny) fillBound();
   });
 
   // Salvar / cancelar

@@ -26,6 +26,7 @@ html, body {
 }
 
 #card {
+  position: relative;
   transition: opacity 0.18s ease, box-shadow 0.15s ease;
   height: 100%;
   display: flex;
@@ -44,7 +45,11 @@ header {
   gap: 8px;
   padding: 1em 1em 0.7em 1.15em;
 }
-body:not(.locked) header { cursor: grab; }
+/* Destravado = modo edição: dá para arrastar por qualquer área vazia. */
+body:not(.locked) #card { cursor: grab; }
+body:not(.locked) #card:active { cursor: grabbing; }
+body:not(.locked) #card:hover { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent); }
+body:not(.locked) .event, body:not(.locked) button { cursor: pointer; }
 .title { min-width: 0; }
 #title-small { font-size: 0.95em; color: var(--accent); font-weight: 600; }
 #title-big { font-size: 1.5em; font-weight: 600; line-height: 1.2; }
@@ -173,3 +178,20 @@ body.no-footer footer { display: none; }
 body.ghost.fade-on-hover #card { opacity: var(--ghost, 0.12); }
 body.ctrl-active #card { box-shadow: inset 0 0 0 2px var(--accent); }
 body.no-header header { display: none; }
+
+/* Alça de redimensionar no canto inferior direito (só destravado). */
+#grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  opacity: 0;
+  transition: opacity 0.15s;
+  background:
+    linear-gradient(135deg, transparent 0 55%, var(--muted) 55% 62%, transparent 62% 72%, var(--muted) 72% 79%, transparent 79%);
+  border-bottom-right-radius: var(--radius);
+}
+body:not(.locked) #card:hover #grip { opacity: 0.8; }
+body.locked #grip { display: none; }
